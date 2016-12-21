@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends Activity implements SensorEventListener {
+    public static final int MAX_SHOW_COUNT = 100;
     private SensorManager mSensorManager;
     private Sensor mAccSensor;//accelerometer sensor
     //==========================================================================================
@@ -26,6 +27,8 @@ public class MainActivity extends Activity implements SensorEventListener {
     private List<Entry> accXEntries;
     private List<Entry> accYEntries;
     private List<Entry> accZEntries;
+
+    private List<Entry> accEntries;
     private int count = 0;
 
     @Override
@@ -39,6 +42,7 @@ public class MainActivity extends Activity implements SensorEventListener {
         accXEntries = new ArrayList<>();
         accYEntries = new ArrayList<>();
         accZEntries = new ArrayList<>();
+        accEntries = new ArrayList<>();
     }
 
     @Override
@@ -47,10 +51,15 @@ public class MainActivity extends Activity implements SensorEventListener {
         accXEntries.add(new Entry(count, sensorEvent.values[0]));
         accYEntries.add(new Entry(count, sensorEvent.values[1]));
         accZEntries.add(new Entry(count, sensorEvent.values[2]));
-        if (accXEntries.size() > 150) {
+        float acc = (float) Math.sqrt(sensorEvent.values[0] * sensorEvent.values[0] +
+                sensorEvent.values[1] * sensorEvent.values[0] +
+                sensorEvent.values[2] * sensorEvent.values[2]);
+        accEntries.add(new Entry(count, acc));
+        if (accXEntries.size() >= MAX_SHOW_COUNT) {
             accXEntries.remove(0);
             accYEntries.remove(0);
             accZEntries.remove(0);
+            accEntries.remove(0);
         }
         LineDataSet accXLineDataSet = new LineDataSet(accXEntries, "accX");
         accXLineDataSet.setColor(Color.RED);
@@ -61,10 +70,14 @@ public class MainActivity extends Activity implements SensorEventListener {
         LineDataSet accZLineDataSet = new LineDataSet(accZEntries, "accZ");
         accZLineDataSet.setColor(Color.BLUE);
 
+        LineDataSet accLineDataSet = new LineDataSet(accEntries, "acc");
+        accLineDataSet.setColor(Color.BLACK);
+
         List<ILineDataSet> dataSets = new ArrayList<>();
         dataSets.add(accXLineDataSet);
         dataSets.add(accYLineDataSet);
         dataSets.add(accZLineDataSet);
+        dataSets.add(accLineDataSet);
         LineData lineData = new LineData(dataSets);
         mLineChart.setData(lineData);
         mLineChart.invalidate();
